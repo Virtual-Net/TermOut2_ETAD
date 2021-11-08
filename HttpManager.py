@@ -11,7 +11,7 @@ class HttpManager:
     #ticketdispenser = TicketDispenser()
 
     def __init__(self):
-        with open('/home/pi/Autopark2020_Exit/TerminalSettings.json') as json_file:
+        with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
             self.data = json.load(json_file)
 
     '''http requests'''
