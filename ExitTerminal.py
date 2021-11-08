@@ -46,7 +46,7 @@ class GuiPart:
         self.F1.grid(columnspan=10, rowspan=10)
         self.F1.grid_rowconfigure(0, weight=1)
 
-        self.photo = PhotoImage(master=self.GUI, file="/home/pi/AutoPark2020_optimization/Images/DCS_2502.png")
+        self.photo = PhotoImage(master=self.GUI, file="/home/pi/AutoPark2020/Images/DCS_2502.png")
         self.label = Label(self.GUI, image=self.photo, bg="black")
         self.label.image = self.photo  # keep a reference!
         self.label.grid(row=0, column=0, columnspan=20, rowspan=30)
