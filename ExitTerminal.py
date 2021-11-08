@@ -274,7 +274,7 @@ class ThreadedClient:
     ticket_at_front = False
     timer = time.time()
     looptimer = 0
-    with open('/home/pi/AutoPark2020_optimization/TerminalSettings.json') as json_file:
+    with open('/home/pi/AutoPark2020/TerminalSettings.json') as json_file:
             data = json.load(json_file)
     dispensername = data['dispenser-type']
     looptimerset = data["loop-time"]
