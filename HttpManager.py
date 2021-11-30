@@ -4,11 +4,12 @@ from Logger_setup import logger
 from GeneralOutput import *
 from TicketDispenserAdel import *
 from TicketDispenserDDM import *
+from TicketDispenserPico import *
 
 
 class HttpManager:
     relays = GeneralOutput()
-    #ticketdispenser = TicketDispenser()
+    # ticketdispenser = TicketDispenser()
 
     def __init__(self):
         with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
@@ -62,7 +63,7 @@ class HttpManager:
         server_ip = self.data['server_ip']
         request = 'http://' + server_ip + ticket_exit + ticket_barcode
         ticket_response = requests.get(request, headers={'Authorization': 'Bearer ' + api_token_exit})
-        logger.info(ticket_response)
+        # print(ticket_response)
         return ticket_response.status_code, ticket_response.content, ticket_response.headers
 
     def sendcardexit(self, cardid):
@@ -219,7 +220,7 @@ class HttpManager:
             
     @staticmethod
     def receive_ticket_exit(result_):
-        with open('/home/pi/Autopark2020_Exit/TerminalSettings.json') as json_file:
+        with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
             data = json.load(json_file)
         dispensername = data['dispenser-type']
         ticketdispenser = globals()['TicketDispenser' + dispensername]()
@@ -229,7 +230,7 @@ class HttpManager:
         if result_ == 503 or result_ == 504 or result_ == 507 :
             ticketdispenser.returnticketcmd()
             buzzer.setbuzzerpin(1.5)
-            logger.info('ticket service unavailable')
+            print('ticket service unavailable')
         elif result_ == 200:
             relays.setbarrierpin()
             relays.resetbarrierpin()
@@ -237,7 +238,7 @@ class HttpManager:
             time.sleep(0.2)
             buzzer.setbuzzerpin(0.5)
             ticketdispenser.captureticketcmd()
-            logger.info('ticket exit granted, 200')
+            print('ticket exit granted, 200')
         elif result_ == 201:
             relays.setbarrierpin()
             relays.resetbarrierpin()
@@ -245,15 +246,15 @@ class HttpManager:
             time.sleep(0.2)
             buzzer.setbuzzerpin(0.5)
             ticketdispenser.captureticketcmd()
-            logger.info('ticket exit granted, 201')
+            print('ticket exit granted, 201')
         elif result_ == 404:
             buzzer.setbuzzerpin(1.5)
             ticketdispenser.returnticketcmd()
-            logger.info('ticket not found')
+            print('ticket not found')
         elif result_ == 500:
             buzzer.setbuzzerpin(1.5)
             ticketdispenser.returnticketcmd()
-            logger.info('server down... send system busy')
+            print('server down... send system busy')
         else:
-            logger.info("Unknown response status code")
+            print("Unknown response status code")
         

@@ -15,17 +15,22 @@ from RFIDReader import *
 from GeneralInput import *
 from TicketDispenserDDM import *
 from TicketDispenserAdel import *
+from TicketDispenserPico import *
+# from USBBarcodeHandler import *
 # from BarcodeHandler import *
 # from Barcode import *
 from Logger_setup import logger
 import json
 import socket
+import evdev
+from evdev import InputDevice, categorize  # import * is evil :)
 
 TIMEOUT = 0.1
 messageflag = False
 enabledispenser = False
 IP_PORT = 7000
 HOSTNAME = ""
+
 
 
 class GuiPart:
@@ -35,7 +40,7 @@ class GuiPart:
         #try:
         self.GUI = Tk()
         self.master2 = master
-        self.GUI.attributes('-fullscreen', True)
+        # self.GUI.attributes('-fullscreen', True)
         self.GUI.config(bg="black")
 
         self.F1 = Frame(self.GUI)
@@ -46,7 +51,7 @@ class GuiPart:
         self.F1.grid(columnspan=10, rowspan=10)
         self.F1.grid_rowconfigure(0, weight=1)
 
-        self.photo = PhotoImage(master=self.GUI, file="/home/pi/AutoPark2020/Images/DCS_2502.png")
+        self.photo = PhotoImage(master=self.GUI, file="/home/pi/AutoPark2020_Exit/Images/DCS_2502.png")
         self.label = Label(self.GUI, image=self.photo, bg="black")
         self.label.image = self.photo  # keep a reference!
         self.label.grid(row=0, column=0, columnspan=20, rowspan=30)
@@ -268,13 +273,16 @@ class ThreadedClient:
     rfid = RFIDReader()
     httpreq = HttpManager()
     loopinfo = GeneralInput()
+    # barcode = USBBarcodeHandler()
     # qrcode = Barcode()
     messageflag = False
     enabledispenser = False
     ticket_at_front = False
+    ticket_in = False
     timer = time.time()
     looptimer = 0
-    with open('/home/pi/AutoPark2020/TerminalSettings.json') as json_file:
+    barcodeResult = ""
+    with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
             data = json.load(json_file)
     dispensername = data['dispenser-type']
     looptimerset = data["loop-time"]
@@ -309,8 +317,8 @@ class ThreadedClient:
         self.thread3.start()
         self.thread4 = threading.Thread(target=self.workerThreadListener)
         self.thread4.start()
-        #self.thread5 = threading.Thread(target=self.workerThreadPeriodicCall)
-        #self.thread5.start()
+        self.thread5 = threading.Thread(target=self.workerThreadUSBBarcode)
+        self.thread5.start()
 
         # Start the periodic call in the GUI to check if the queue contains
         # anything
@@ -661,7 +669,120 @@ class ThreadedClient:
                 #print(msg_screen)
             except:
                 print('no msg')
-            
+                
+    def workerThreadDispenserPico(self):
+        """This is where we handle the asynchronous I/O. For example, it may be
+        a 'select(  )'. One important thing to remember is that the thread has
+        to yield control pretty regularly,
+        by select or otherwise."""
+        self.queue.put(1)
+        self.queuechk.put(1)
+        while self.running:
+            # To simulate asynchronous I/O, we create a random number at random intervals.
+            # Replace the following two lines with the real thing.
+            loopstate = self.loopinfo.readloopstate()
+            time.sleep(0.2)
+            if loopstate == 1  or self.looptimer < self.looptimerset:
+                logger.info('loop was activated')
+                self.ticketdispenser_.getTicketDispenserStatus()
+                ticketdispenserrespcmd = self.ticketdispenser_.readTicketDispenserResponse()
+                print(ticketdispenserrespcmd)
+                if ticketdispenserrespcmd == b'\x00\x01':
+                    print('ticket @ front')
+                    if self.ticket_at_front == False:
+                        self.ticketdispenser_.intaketochipcmd()
+                        self.ticket_at_front = True
+                        self.ticket_in = True
+                        self.barcodeResult = ""
+                elif ticketdispenserrespcmd == b'\x00\x00':
+                    self.ticket_at_front = False
+                    self.barcodeResult = ""
+                    print('no ticket present')
+                elif ticketdispenserrespcmd == b'\x00\x06' and self.barcodeResult == "":
+                    self.ticketdispenser_.readPosition3TicketDispenserCmd()
+                elif ticketdispenserrespcmd == b'\x00\x02' and self.barcodeResult == "":
+                    for it in range(9):
+                        self.ticketdispenser_.stepInTicketDispenserCmd()
+                elif ticketdispenserrespcmd == b'\x00\x04' and self.barcodeResult == "":
+                    self.ticketdispenser_.readPosition1TicketDispenserCmd()
+                elif ticketdispenserrespcmd == b'\x00\x03' and self.barcodeResult == "":
+                    self.ticketdispenser_.returnticketcmd()
+                if self.messageflag == False:
+                    msg_screen = 1
+                self.looptimer =float(time.time() - self.timer)
+            elif loopstate == 0:
+                if self.enabledispenser == False:
+                    self.enabledispenser = True
+                if self.messageflag == True:
+                    msg_screen = 2
+                self.timer = time.time()
+                """try:
+                    print(self.queue.get(0))
+                except:
+                    print("nothing at queue")"""
+            try:
+                if self.msg != msg_screen:
+                    self.msg = msg_screen
+                    self.queue.put(msg_screen)
+                    self.queuechk.put(msg_screen)
+                    #print(self.queue.get(0))
+                #print(msg_screen)
+            except:
+                print('no msg')
+
+    def workerThreadUSBBarcode(self):
+        while self.running:
+            dev = InputDevice('/dev/input/event4')
+            # Provided as an example taken from my own keyboard attached to a Centos 6 box:
+            scancodes = {
+                # Scancode: ASCIICode
+                0: None, 1: u'ESC', 2: u'1', 3: u'2', 4: u'3', 5: u'4', 6: u'5', 7: u'6', 8: u'7', 9: u'8',
+                10: u'9', 11: u'0', 12: u'-', 13: u'=', 14: u'BKSP', 15: u'TAB', 16: u'Q', 17: u'W', 18: u'E', 19: u'R',
+                20: u'T', 21: u'Y', 22: u'U', 23: u'I', 24: u'O', 25: u'P', 26: u'[', 27: u']', 28: u'CRLF', 29: u'LCTRL',
+                30: u'A', 31: u'S', 32: u'D', 33: u'F', 34: u'G', 35: u'H', 36: u'J', 37: u'K', 38: u'L', 39: u';',
+                40: u'"', 41: u'`', 42: u'LSHFT', 43: u'\\', 44: u'Z', 45: u'X', 46: u'C', 47: u'V', 48: u'B', 49: u'N',
+                50: u'M', 51: u',', 52: u'.', 53: u'/', 54: u'RSHFT', 56: u'LALT', 100: u'RALT'
+            }
+            #result = ""
+            for event in dev.read_loop():
+                if event.type == evdev.ecodes.EV_KEY:
+                   data = evdev.categorize(event)  # Save the event temporarily to introspect it
+                   if data.keystate == 1:  # Down events only
+                       key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
+                       # print (key_lookup)  # Print it all out!
+                       self.barcodeResult += key_lookup
+                print ('BARCODE DATA: ', self.barcodeResult)   
+                if len(self.barcodeResult) > 9 and self.ticket_in == True:
+                    self.barcodeResult = self.barcodeResult[:9]
+                    try:
+                        resp, cont, head = self.httpreq.sendticketexit(self.barcodeResult)
+                        c = json.loads(cont.decode('utf-8'))
+                        msg_screen = resp
+                        if msg_screen == 503:
+                            ex = str(c['exception'])
+                            print(ex)
+                            self.barcodeResult = ""
+                            self.ticketdispenser_.returnticketcmd()
+                            self.ticket_in = False
+                        if msg_screen == 503 and ex == "TicketNotPaidException":
+                            msg_screen = msg_screen + 1
+                            self.barcodeResult = ""
+                            self.ticketdispenser_.returnticketcmd()
+                            self.ticket_in = False
+                        elif msg_screen == 503 and ex != "TicketNotPaidException":
+                            msg_screen = msg_screen + 4
+                            self.barcodeResult = ""
+                            self.ticketdispenser_.returnticketcmd()
+                            self.ticket_in = False
+                        else:
+                            # self.barcodeResult = ""
+                            pass
+                        self.httpreq.receive_ticket_exit(resp)
+                        # time.sleep(0.5)
+                    except:
+                        print("BARCODE EXCEPTION")
+                elif len(self.barcodeResult) == 0 :
+                    self.barcodeResult = ""
 
     def workerThreadRFID(self):
         while self.running:
