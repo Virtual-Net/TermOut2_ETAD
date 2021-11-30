@@ -16,8 +16,18 @@ class GeneralOutput:
         return None
 
     def resetbuzzerpin(self):
-        buzzer = automationhat.relay.two
+        buzzer = automationhat.output.two
         buzzer.off()
+        return None
+        
+    def setFanspin(self):
+        fan = automationhat.output.two
+        fan.on()
+        return None
+        
+    def resetFanspin(self):
+        fan = automationhat.output.two
+        fun.off()
         return None
 
     # automationhat onboard relays
@@ -31,7 +41,6 @@ class GeneralOutput:
         bar = automationhat.relay.one
         bar.off()
         return None
-
 
     def setlightpinred(self):
         light = automationhat.relay.two
