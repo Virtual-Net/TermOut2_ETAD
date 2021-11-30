@@ -783,6 +783,13 @@ class ThreadedClient:
                         print("BARCODE EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
+            try:
+                if self.msg != msg_screen:
+                    self.msg = msg_screen
+                    self.queue.put(msg_screen)
+                    self.queuechk.put(msg_screen)
+            except:
+                logger.info("no msg")
 
     def workerThreadRFID(self):
         while self.running:
