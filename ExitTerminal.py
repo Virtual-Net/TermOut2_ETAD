@@ -866,6 +866,44 @@ class ThreadedClient:
                            self.barcodeResult += key_lookup
                     print ('QRCODE DATA: ', self.barcodeResult) 
                 time.sleep(0.5)
+                if len(self.barcodeResult) > 9:
+                    self.barcodeResult = self.barcodeResult[:9]
+                    try:
+                        resp, cont, head = self.httpreq.sendticketexit(self.barcodeResult)
+                        c = json.loads(cont.decode('utf-8'))
+                        msg_screen = resp
+                        if msg_screen == 503:
+                            ex = str(c['exception'])
+                            print(ex)
+                            self.barcodeResult = ""
+                            # self.ticketdispenser_.returnticketcmd()
+                            # self.ticket_in = False
+                        if msg_screen == 503 and ex == "TicketNotPaidException":
+                            msg_screen = msg_screen + 1
+                            self.barcodeResult = ""
+                            # self.ticketdispenser_.returnticketcmd()
+                            # self.ticket_in = False
+                        elif msg_screen == 503 and ex != "TicketNotPaidException":
+                            msg_screen = msg_screen + 4
+                            self.barcodeResult = ""
+                            # self.ticketdispenser_.returnticketcmd()
+                            # self.ticket_in = False
+                        else:
+                            # self.barcodeResult = ""
+                            pass
+                        self.httpreq.receive_ticket_exit(resp)
+                        # time.sleep(0.5)
+                    except:
+                        print("QRCODE EXCEPTION")
+                elif len(self.barcodeResult) == 0 :
+                    self.barcodeResult = ""
+            try:
+                if self.msg != msg_screen:
+                    self.msg = msg_screen
+                    self.queue.put(msg_screen)
+                    self.queuechk.put(msg_screen)
+            except:
+                print("no msg")
                 #barcode = input('scan the barcode \n')
                 '''try:
                     barcode = inputimeout(prompt='scan the barcode \n',timeout=3)
