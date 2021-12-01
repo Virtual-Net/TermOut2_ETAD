@@ -573,7 +573,7 @@ class ThreadedClient:
                     #print(self.queue.get(0))
 					#print(msg_screen)
             except:
-                print('no msg')
+                print('no msg on Adel Dispenser Thread')
            
 
     def workerThreadDispenserDDM(self):
@@ -672,7 +672,7 @@ class ThreadedClient:
                     #print(self.queue.get(0))
                 #print(msg_screen)
             except:
-                print('no msg')
+                print('no msg on DDM Thread')
                 
     def workerThreadDispenserPico(self):
         """This is where we handle the asynchronous I/O. For example, it may be
@@ -724,15 +724,15 @@ class ThreadedClient:
                     print(self.queue.get(0))
                 except:
                     print("nothing at queue")"""
-            try:
-                if self.msg != msg_screen:
-                    self.msg = msg_screen
-                    self.queue.put(msg_screen)
-                    self.queuechk.put(msg_screen)
-                    #print(self.queue.get(0))
-                #print(msg_screen)
-            except:
-                print('no msg')
+                try:
+                    if self.msg != msg_screen:
+                        self.msg = msg_screen
+                        self.queue.put(msg_screen)
+                        self.queuechk.put(msg_screen)
+                        #print(self.queue.get(0))
+                    #print(msg_screen)
+                except:
+                    print('no msg on Pico Thread')
 
     def workerThreadUSBBarcode(self):
         while self.running:
@@ -787,13 +787,13 @@ class ThreadedClient:
                         print("BARCODE EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
-            try:
-                if self.msg != msg_screen:
-                    self.msg = msg_screen
-                    self.queue.put(msg_screen)
-                    self.queuechk.put(msg_screen)
-            except:
-                logger.info("no msg")
+                try:
+                    if self.msg != msg_screen:
+                        self.msg = msg_screen
+                        self.queue.put(msg_screen)
+                        self.queuechk.put(msg_screen)
+                except:
+                       print("no msg on USB Barcode Thread")
 
     def workerThreadRFID(self):
         while self.running:
@@ -825,7 +825,7 @@ class ThreadedClient:
                             #print(self.queue.get(0))
                         #print(msg_screen)
                     except:
-                        print('no msg')
+                        print('no msg on RFID Thread')
                     # self.queue.put(msg)
                 # self.enabledispenser = False
             """elif loopstate == 0 and self.looptimer > self.looptimerset:
@@ -897,13 +897,13 @@ class ThreadedClient:
                         print("QRCODE EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
-            try:
-                if self.msg != msg_screen:
-                    self.msg = msg_screen
-                    self.queue.put(msg_screen)
-                    self.queuechk.put(msg_screen)
-            except:
-                print("no msg")
+                try:
+                    if self.msg != msg_screen:
+                        self.msg = msg_screen
+                        self.queue.put(msg_screen)
+                        self.queuechk.put(msg_screen)
+                except:
+                    print("no msg on QRCode Thread")
                 #barcode = input('scan the barcode \n')
                 '''try:
                     barcode = inputimeout(prompt='scan the barcode \n',timeout=3)
