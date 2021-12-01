@@ -840,20 +840,34 @@ class ThreadedClient:
         while self.running:
             # To simulate asynchronous I/O, we create a random number at random intervals.
             # Replace the following two lines with the real thing.
+            dev = InputDevice('/dev/input/event5')
+            # Provided as an example taken from my own keyboard attached to a Centos 6 box:
+            scancodes = {
+                # Scancode: ASCIICode
+                0: None, 1: u'ESC', 2: u'1', 3: u'2', 4: u'3', 5: u'4', 6: u'5', 7: u'6', 8: u'7', 9: u'8',
+                10: u'9', 11: u'0', 12: u'-', 13: u'=', 14: u'BKSP', 15: u'TAB', 16: u'Q', 17: u'W', 18: u'E', 19: u'R',
+                20: u'T', 21: u'Y', 22: u'U', 23: u'I', 24: u'O', 25: u'P', 26: u'[', 27: u']', 28: u'CRLF', 29: u'LCTRL',
+                30: u'A', 31: u'S', 32: u'D', 33: u'F', 34: u'G', 35: u'H', 36: u'J', 37: u'K', 38: u'L', 39: u';',
+                40: u'"', 41: u'`', 42: u'LSHFT', 43: u'\\', 44: u'Z', 45: u'X', 46: u'C', 47: u'V', 48: u'B', 49: u'N',
+                50: u'M', 51: u',', 52: u'.', 53: u'/', 54: u'RSHFT', 56: u'LALT', 100: u'RALT'
+            }
             loopstate = self.loopinfo.readloopstate()
             barcode = '0'
             time.sleep(0.2)
             if loopstate == 1 or self.looptimer < self.looptimerset:
                 logger.info('loop was activated')
                 self.machinestate = 1
-                #looptimer = threading.Timer(10.0, self.looptimer_tick)
-                #looptimer.start()
-                #if self.messageflag == False:
-                    #self.msg = 1
-                    # self.queue.put(msg)
+                for event in dev.read_loop():
+                    if event.type == evdev.ecodes.EV_KEY:
+                       data = evdev.categorize(event)  # Save the event temporarily to introspect it
+                       if data.keystate == 1:  # Down events only
+                           key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
+                           # print (key_lookup)  # Print it all out!
+                           self.barcodeResult += key_lookup
+                    print ('QRCODE DATA: ', self.barcodeResult) 
                 time.sleep(0.5)
                 #barcode = input('scan the barcode \n')
-                try:
+                '''try:
                     barcode = inputimeout(prompt='scan the barcode \n',timeout=3)
                 except:
                     pass
@@ -878,7 +892,7 @@ class ThreadedClient:
                         #print(msg_screen)
                     except:
                         print('no msg')
-                    logger.info("No message")
+                    logger.info("No message")'''
                     # self.queue.put(msg)
             """elif loopstate == 0 and self.looptimer > self.looptimerset:
                 if self.messageflag == True:
