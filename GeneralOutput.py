@@ -27,7 +27,7 @@ class GeneralOutput:
         
     def resetFanspin(self):
         fan = automationhat.output.two
-        fun.off()
+        fan.off()
         return None
 
     # automationhat onboard relays

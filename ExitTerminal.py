@@ -20,6 +20,7 @@ from TicketDispenserPico import *
 # from BarcodeHandler import *
 # from Barcode import *
 from Logger_setup import logger
+from gpiozero import CPUTemperature
 import json
 import socket
 import evdev
@@ -280,6 +281,7 @@ class ThreadedClient:
     ticket_at_front = False
     ticket_in = False
     timer = time.time()
+    cpuTemp = CPUTemperature()
     looptimer = 0
     barcodeResult = ""
     with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
@@ -319,6 +321,8 @@ class ThreadedClient:
         self.thread4.start()
         self.thread5 = threading.Thread(target=self.workerThreadUSBBarcode)
         self.thread5.start()
+        self.thread6 = threading.Thread(target=self.workerThreadReadCPUTemp)
+        self.thread6.start()
 
         # Start the periodic call in the GUI to check if the queue contains
         # anything
@@ -934,6 +938,19 @@ class ThreadedClient:
             # necessary to terminate it at program termination:
             #socketHandler.setDaemon(True)  
             #socketHandler.run()
+            
+        
+    def workerThreadReadCPUTemp(self):
+        while self.running:
+            coolingFans = GeneralOutput()
+            print('CPU temperature is', self.cpuTemp.temperature)
+            time.sleep(2)
+            if self.cpuTemp.temperature > 50:
+                coolingFans.setFanspin()
+                print('Cooling fans started')
+            elif self.cpuTemp.temperature < 50:
+                coolingFans.resetFanspin()
+                print('Cooling fans stopped')
     
 
     def endApplication(self):
