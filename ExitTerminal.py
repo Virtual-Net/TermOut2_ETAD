@@ -736,7 +736,7 @@ class ThreadedClient:
 
     def workerThreadUSBBarcode(self):
         while self.running:
-            dev = InputDevice('/dev/input/event4')
+            dev = InputDevice('/dev/input/event1')
             # Provided as an example taken from my own keyboard attached to a Centos 6 box:
             scancodes = {
                 # Scancode: ASCIICode
@@ -840,7 +840,7 @@ class ThreadedClient:
         while self.running:
             # To simulate asynchronous I/O, we create a random number at random intervals.
             # Replace the following two lines with the real thing.
-            dev = InputDevice('/dev/input/event5')
+            dev = InputDevice('/dev/input/event2')
             # Provided as an example taken from my own keyboard attached to a Centos 6 box:
             scancodes = {
                 # Scancode: ASCIICode

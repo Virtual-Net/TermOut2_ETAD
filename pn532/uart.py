@@ -63,20 +63,20 @@ class PN532_UART(PN532):
 
     def _gpio_init(self, reset=None,irq=None):
         self._irq = irq
-        GPIO.setmode(GPIO.BCM)
+        '''GPIO.setmode(GPIO.BCM)
         if reset:
             GPIO.setup(reset, GPIO.OUT)
             GPIO.output(reset, True)
         if irq:
-            GPIO.setup(irq, GPIO.IN)
+            GPIO.setup(irq, GPIO.IN)'''
 
     def _reset(self, pin):
         """Perform a hardware reset toggle"""
-        GPIO.output(pin, True)
+        '''GPIO.output(pin, True)
         time.sleep(0.1)
         GPIO.output(pin, False)
         time.sleep(0.5)
-        GPIO.output(pin, True)
+        GPIO.output(pin, True)'''
         time.sleep(0.1)
 
     def _wakeup(self):
