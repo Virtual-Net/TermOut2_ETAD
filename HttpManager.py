@@ -228,7 +228,7 @@ class HttpManager:
         buzzer = GeneralOutput()
         relays = GeneralOutput()
         if result_ == 503 or result_ == 504 or result_ == 507 :
-            ticketdispenser.returnticketcmd()
+            # ticketdispenser.returnticketcmd()
             buzzer.setbuzzerpin(1.5)
             print('ticket service unavailable')
         elif result_ == 200:
@@ -237,7 +237,7 @@ class HttpManager:
             buzzer.setbuzzerpin(0.5)
             time.sleep(0.2)
             buzzer.setbuzzerpin(0.5)
-            ticketdispenser.captureticketcmd()
+            # ticketdispenser.captureticketcmd()
             print('ticket exit granted, 200')
         elif result_ == 201:
             relays.setbarrierpin()
@@ -245,15 +245,15 @@ class HttpManager:
             buzzer.setbuzzerpin(0.5)
             time.sleep(0.2)
             buzzer.setbuzzerpin(0.5)
-            ticketdispenser.captureticketcmd()
+            # ticketdispenser.captureticketcmd()
             print('ticket exit granted, 201')
         elif result_ == 404:
             buzzer.setbuzzerpin(1.5)
-            ticketdispenser.returnticketcmd()
+            # ticketdispenser.returnticketcmd()
             print('ticket not found')
         elif result_ == 500:
             buzzer.setbuzzerpin(1.5)
-            ticketdispenser.returnticketcmd()
+            # ticketdispenser.returnticketcmd()
             print('server down... send system busy')
         else:
             print("Unknown response status code")
