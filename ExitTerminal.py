@@ -284,6 +284,7 @@ class ThreadedClient:
     cpuTemp = CPUTemperature()
     looptimer = 0
     barcodeResult = ""
+    qrcodeResult = ""
     with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
             data = json.load(json_file)
     dispensername = data['dispenser-type']
@@ -794,6 +795,7 @@ class ThreadedClient:
                         self.queuechk.put(msg_screen)
                 except:
                        print("no msg on USB Barcode Thread")
+                       
 
     def workerThreadRFID(self):
         while self.running:
@@ -840,7 +842,7 @@ class ThreadedClient:
         while self.running:
             # To simulate asynchronous I/O, we create a random number at random intervals.
             # Replace the following two lines with the real thing.
-            dev = InputDevice('/dev/input/event2')
+            dev = InputDevice('/dev/input/event0')
             # Provided as an example taken from my own keyboard attached to a Centos 6 box:
             scancodes = {
                 # Scancode: ASCIICode
@@ -863,79 +865,47 @@ class ThreadedClient:
                        if data.keystate == 1:  # Down events only
                            key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                            # print (key_lookup)  # Print it all out!
-                           self.barcodeResult += key_lookup
-                    print ('QRCODE DATA: ', self.barcodeResult) 
-                time.sleep(0.5)
-                if len(self.barcodeResult) > 9:
-                    self.barcodeResult = self.barcodeResult[:9]
-                    try:
-                        resp, cont, head = self.httpreq.sendticketexit(self.barcodeResult)
-                        c = json.loads(cont.decode('utf-8'))
-                        msg_screen = resp
-                        if msg_screen == 503:
-                            ex = str(c['exception'])
-                            print(ex)
-                            self.barcodeResult = ""
-                            # self.ticketdispenser_.returnticketcmd()
-                            # self.ticket_in = False
-                        if msg_screen == 503 and ex == "TicketNotPaidException":
-                            msg_screen = msg_screen + 1
-                            self.barcodeResult = ""
-                            # self.ticketdispenser_.returnticketcmd()
-                            # self.ticket_in = False
-                        elif msg_screen == 503 and ex != "TicketNotPaidException":
-                            msg_screen = msg_screen + 4
-                            self.barcodeResult = ""
-                            # self.ticketdispenser_.returnticketcmd()
-                            # self.ticket_in = False
-                        else:
-                            # self.barcodeResult = ""
-                            pass
-                        self.httpreq.receive_ticket_exit(resp)
-                        # time.sleep(0.5)
-                    except:
-                        print("QRCODE EXCEPTION")
-                elif len(self.barcodeResult) == 0 :
-                    self.barcodeResult = ""
-                try:
-                    if self.msg != msg_screen:
-                        self.msg = msg_screen
-                        self.queue.put(msg_screen)
-                        self.queuechk.put(msg_screen)
-                except:
-                    print("no msg on QRCode Thread")
-                #barcode = input('scan the barcode \n')
-                '''try:
-                    barcode = inputimeout(prompt='scan the barcode \n',timeout=3)
-                except:
-                    pass
-                # print("The barcode : " + str(len(barcode)))
-                if len(barcode) == 9:
-                    respQR, contQR, headQR = self.httpreq.sendbookedexit(barcode)
-                    print(respQR)
-                    msg_screen = respQR
-                    if msg_screen == 404:
-                        msg_screen = msg_screen + 2
-                    if msg_screen == 503:
-                        ex = str(c['exception'])
-                        logger.info(ex)
-                    if msg_screen == 503 and ex == "TicketNotPaidException":
-                        msg_screen = msg_screen + 2
+                           self.qrcodeResult += key_lookup
+                    print ('QRCODE DATA: ', self.qrcodeResult) 
+                    if len(self.qrcodeResult) > 9:
+                        self.qrcodeResult = self.qrcodeResult[:9]
+                        try:
+                            resp, cont, head = self.httpreq.sendticketexit(self.qrcodeResult)
+                            c = json.loads(cont.decode('utf-8'))
+                            msg_screen = resp
+                            if msg_screen == 503:
+                                ex = str(c['exception'])
+                                print(ex)
+                                self.qrcodeResult = ""
+                                # self.ticketdispenser_.returnticketcmd()
+                                # self.ticket_in = False
+                            if msg_screen == 503 and ex == "TicketNotPaidException":
+                                msg_screen = msg_screen + 1
+                                self.qrcodeResult = ""
+                                # self.ticketdispenser_.returnticketcmd()
+                                # self.ticket_in = False
+                            elif msg_screen == 503 and ex != "TicketNotPaidException":
+                                msg_screen = msg_screen + 4
+                                self.qrcodeResult = ""
+                                # self.ticketdispenser_.returnticketcmd()
+                                # self.ticket_in = False
+                            else:
+                                # self.barcodeResult = ""
+                                pass
+                            self.httpreq.receive_ticket_exit(resp)
+                            # time.sleep(0.5)
+                        except:
+                            print("QRCODE EXCEPTION")
+                    elif len(self.qrcodeResult) == 0 :
+                        self.qrcodeResult = ""
                     try:
                         if self.msg != msg_screen:
                             self.msg = msg_screen
                             self.queue.put(msg_screen)
                             self.queuechk.put(msg_screen)
-                            #print(self.queue.get(0))
-                        #print(msg_screen)
                     except:
-                        print('no msg')
-                    logger.info("No message")'''
-                    # self.queue.put(msg)
-            """elif loopstate == 0 and self.looptimer > self.looptimerset:
-                if self.messageflag == True:
-                    msg_screen = 2"""
-                #self.msg = msg_screen
+                        print("no msg on QRCode Thread")
+                        
                     
     def workerThreadListener(self):
         serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
