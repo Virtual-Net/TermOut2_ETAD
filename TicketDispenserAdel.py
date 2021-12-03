@@ -57,7 +57,7 @@ class TicketDispenserAdel(object):
     def getinput(self):
         self.ser.write(b'\x01\x01\x00\x02\x87\x01\x84')
         logger.info('Send ticket dispenser get input command')
-        print(self.ser.write(b'\x01\x01\x00\x02\x87\x01\x84'))
+        logger.info(self.ser.write(b'\x01\x01\x00\x02\x87\x01\x84'))
 
     def abort(self):
         self.ser.write(b'\x01\x01\x00\x01\xC7\xC6')
