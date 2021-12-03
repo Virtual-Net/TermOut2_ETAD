@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #import serial
 import RPi.GPIO as GPIO
-import logging
+from Logger_setup import logger
 import json
 from GeneralOutput import GeneralOutput
 from pn532 import *
@@ -39,12 +39,12 @@ class RFIDReader(object):
         try:
             pn532 = PN532_UART(debug=False, reset=20)
             ic, ver, rev, support = pn532.get_firmware_version()
-            print('Found PN532 with firmware version: {0}.{1}'.format(ver, rev))
+            logger.info('Found PN532 with firmware version: {0}.{1}'.format(ver, rev))
             
             # Configure PN532 to communicate with MiFare cards
             pn532.SAM_configuration()
     
-            print('Waiting for RFID/NFC card...')
+            logger.info('Waiting for RFID/NFC card...')
             # Check if a card is available to read
             uid = pn532.read_passive_target(timeout=0.5)
             #print('.', end="")
@@ -52,14 +52,14 @@ class RFIDReader(object):
             if uid is None:
                 return
             else:
-                print('Found card with UID:', [hex(i) for i in uid])
-                print(uid)
+                logger.info('Found card with UID:', [hex(i) for i in uid])
+                logger.info(uid)
                 uid_ = uid.hex()
-                print(uid_)
+                logger.info(uid_)
                 return uid_
             #GPIO.cleanup()
         except:
-            print('RFID FAILED')
+            logger.info('RFID FAILED')
             pass
 
     #def readrf(self):
