@@ -41,7 +41,7 @@ class TicketDispenserDDM(object):
     def getinput(self):
         self.ser.write(b'\x01\x01\x00\x02\x87\x01\x84')
         logger.info('Send ticket dispenser get input command')
-        print(self.ser.write(b'\x01\x01\x00\x02\x87\x01\x84'))
+        logger.info(self.ser.write(b'\x01\x01\x00\x02\x87\x01\x84'))
 
     def abort(self):
         self.ser.write(b'\x01\x01\x00\x01\xC7\xC6')
@@ -51,7 +51,7 @@ class TicketDispenserDDM(object):
         time.sleep(0.5)
         ticketdispenserstatus = 0
         ticketdispenserstatus = self.ser.read(28)
-        print(ticketdispenserstatus)
+        logger.info(ticketdispenserstatus)
         ticketdispenserstatustr = str(ticketdispenserstatus)
         ticket_barcode = ticketdispenserstatustr[
                          ticketdispenserstatustr.find("=") + 1:ticketdispenserstatustr.find("\r")]
@@ -60,5 +60,5 @@ class TicketDispenserDDM(object):
         ticket_barcode = ticket_barcode[:9]
         # ticket_barcode = str()
         # ticket_barcode = str(ticket_barcode)[2:10]
-        print(ticket_barcode)
+        logger.info(ticket_barcode)
         return ticket_barcode, ticketdispenserstatus
