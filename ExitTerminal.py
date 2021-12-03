@@ -792,12 +792,12 @@ class ThreadedClient:
                         print("BARCODE EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
-            try:
-                if self.msg != msg_screen:
-                    self.msg = msg_screen
-                    self.queue.put(msg_screen)
-                    self.queuechk.put(msg_screen)
-            except:
+                try:
+                    if self.msg != msg_screen:
+                        self.msg = msg_screen
+                        self.queue.put(msg_screen)
+                        self.queuechk.put(msg_screen)
+                except:
                     print("no msg on USB Barcode Thread")
                        
 
@@ -902,13 +902,13 @@ class ThreadedClient:
                             print("QRCODE EXCEPTION")
                     elif len(self.qrcodeResult) == 0 :
                         self.qrcodeResult = ""
-                try:
-                    if self.msg != msg_screen:
-                        self.msg = msg_screen
-                        self.queue.put(msg_screen)
-                        self.queuechk.put(msg_screen)
-                except:
-                    print("no msg on QRCode Thread")
+                    try:
+                        if self.msg != msg_screen:
+                            self.msg = msg_screen
+                            self.queue.put(msg_screen)
+                            self.queuechk.put(msg_screen)
+                    except:
+                        print("no msg on QRCode Thread")
                         
                     
     def workerThreadListener(self):
