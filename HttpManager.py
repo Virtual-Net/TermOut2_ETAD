@@ -50,9 +50,9 @@ class HttpManager:
         server_ip = self.data['server_ip']
         comm_protocol = "http://"
         request = comm_protocol + server_ip + booked_entrance + qrcode
-        print(request)
+        logger.info(request)
         booked_response = requests.get(request, headers={'Authorization': 'Bearer ' + api_token_entrance})
-        print(booked_response.content)
+        logger.info(booked_response.content)
         logger.info(booked_response)
         return booked_response, booked_response.content, booked_response.headers
         
@@ -82,7 +82,7 @@ class HttpManager:
         server_ip = self.data['server_ip']
         comm_protocol = "http://"
         request = comm_protocol + server_ip + booked_exit + qrcode
-        print('request: ' + request)
+        logger.info('request: ' + request)
         booked_response = requests.get(request, headers={'Authorization': 'Bearer ' + api_token_exit})
         #print(booked_response.content)
         logger.info(booked_response)
@@ -230,7 +230,7 @@ class HttpManager:
         if result_ == 503 or result_ == 504 or result_ == 507 :
             # ticketdispenser.returnticketcmd()
             buzzer.setbuzzerpin(1.5)
-            print('ticket service unavailable')
+            logger.info('ticket service unavailable')
         elif result_ == 200:
             relays.setbarrierpin()
             relays.resetbarrierpin()
@@ -238,7 +238,7 @@ class HttpManager:
             time.sleep(0.2)
             buzzer.setbuzzerpin(0.5)
             # ticketdispenser.captureticketcmd()
-            print('ticket exit granted, 200')
+            logger.info('ticket exit granted, 200')
         elif result_ == 201:
             relays.setbarrierpin()
             relays.resetbarrierpin()
@@ -246,15 +246,15 @@ class HttpManager:
             time.sleep(0.2)
             buzzer.setbuzzerpin(0.5)
             # ticketdispenser.captureticketcmd()
-            print('ticket exit granted, 201')
+            logger.info('ticket exit granted, 201')
         elif result_ == 404:
             buzzer.setbuzzerpin(1.5)
             # ticketdispenser.returnticketcmd()
-            print('ticket not found')
+            logger.info('ticket not found')
         elif result_ == 500:
             buzzer.setbuzzerpin(1.5)
             # ticketdispenser.returnticketcmd()
-            print('server down... send system busy')
+            logger.info('server down... send system busy')
         else:
-            print("Unknown response status code")
+            logger.info("Unknown response status code")
         
