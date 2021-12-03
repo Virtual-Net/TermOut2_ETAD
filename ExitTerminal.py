@@ -736,8 +736,28 @@ class ThreadedClient:
                 print('no msg on Pico Thread')
 
     def workerThreadUSBBarcode(self):
+        '''DevicesList = open('/proc/bus/input/devices').readlines()
+        if 'GD32icroelectronics GD32 Custm HID' in DevicesList[1]:
+            device_event_number = DevicesList[5].split('event',1)[1]
+            dev = '/dev/input/event' + device_event_number
+        elif 'GD32icroelectronics GD32 Custm HID' in DevicesList[13]:
+            device_event_number = DevicesList[17].split('event',1)[1]
+            dev = '/dev/input/event' + device_event_number'''
         while self.running:
-            dev = InputDevice('/dev/input/event1')
+            DevicesList = open('/proc/bus/input/devices').readlines()
+            if 'GD32icroelectronics GD32 Custm HID' in DevicesList[1]:
+                device_event_number = DevicesList[5].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            elif 'GD32icroelectronics GD32 Custm HID' in DevicesList[13]:
+                device_event_number = DevicesList[17].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            elif 'GD32icroelectronics GD32 Custm HID' in DevicesList[25]:
+                device_event_number = DevicesList[29].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            elif 'GD32icroelectronics GD32 Custm HID' in DevicesList[37]:
+                device_event_number = DevicesList[41].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            # dev = InputDevice('/dev/input/event1')
             # Provided as an example taken from my own keyboard attached to a Centos 6 box:
             scancodes = {
                 # Scancode: ASCIICode
@@ -844,9 +864,22 @@ class ThreadedClient:
 
     def workerThreadQrCode(self):
         while self.running:
+            DevicesList = open('/proc/bus/input/devices').readlines()
+            if 'USBKey Chip USBKey Module' in DevicesList[1]:
+                device_event_number = DevicesList[5].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            elif 'USBKey Chip USBKey Module' in DevicesList[13]:
+                device_event_number = DevicesList[17].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            elif 'USBKey Chip USBKey Module' in DevicesList[25]:
+                device_event_number = DevicesList[29].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
+            elif 'USBKey Chip USBKey Module' in DevicesList[37]:
+                device_event_number = DevicesList[41].split('event',1)[1]
+                dev = InputDevice('/dev/input/event' + device_event_number.strip())
             # To simulate asynchronous I/O, we create a random number at random intervals.
             # Replace the following two lines with the real thing.
-            dev = InputDevice('/dev/input/event0')
+            # dev = InputDevice('/dev/input/event0')
             # Provided as an example taken from my own keyboard attached to a Centos 6 box:
             scancodes = {
                 # Scancode: ASCIICode
