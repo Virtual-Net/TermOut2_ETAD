@@ -725,15 +725,15 @@ class ThreadedClient:
                     print(self.queue.get(0))
                 except:
                     print("nothing at queue")"""
-                try:
-                    if self.msg != msg_screen:
-                        self.msg = msg_screen
-                        self.queue.put(msg_screen)
-                        self.queuechk.put(msg_screen)
-                        #print(self.queue.get(0))
-                    #print(msg_screen)
-                except:
-                    print('no msg on Pico Thread')
+            try:
+                if self.msg != msg_screen:
+                    self.msg = msg_screen
+                    self.queue.put(msg_screen)
+                    self.queuechk.put(msg_screen)
+                    #print(self.queue.get(0))
+                #print(msg_screen)
+            except:
+                print('no msg on Pico Thread')
 
     def workerThreadUSBBarcode(self):
         while self.running:
@@ -756,41 +756,41 @@ class ThreadedClient:
                        key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                        # print (key_lookup)  # Print it all out!
                        self.barcodeResult += key_lookup
-            print ('BARCODE DATA: ', self.barcodeResult)   
-            if len(self.barcodeResult) >= 13 and self.ticket_in == True:
-                self.barcodeResult = self.barcodeResult[:9]
-                try:
-                    resp, cont, head = self.httpreq.sendticketexit(self.barcodeResult)
-                    c = json.loads(cont.decode('utf-8'))
-                    msg_screen = resp
-                    if msg_screen == 503:
-                        ex = str(c['exception'])
-                        print(ex)
-                        self.barcodeResult = ""
-                        self.ticketdispenser_.returnticketcmd()
-                        self.ticket_in = False
-                    if msg_screen == 503 and ex == "TicketNotPaidException":
-                        msg_screen = msg_screen + 1
-                        self.barcodeResult = ""
-                        self.ticketdispenser_.returnticketcmd()
-                        self.ticket_in = False
-                    elif msg_screen == 503 and ex != "TicketNotPaidException":
-                        msg_screen = msg_screen + 4
-                        self.barcodeResult = ""
-                        self.ticketdispenser_.returnticketcmd()
-                        self.ticket_in = False
-                    elif msg_screen == 200 or msg_screen == 201:
-                        self.ticketdispenser_.captureticketcmd()
-                        self.barcodeResult = ""
-                        self.ticket_in = True
-                    else:
-                        # self.barcodeResult = ""
-                        pass
-                    self.httpreq.receive_ticket_exit(resp)
-                    # time.sleep(0.5)
-                except:
-                    print("BARCODE EXCEPTION")
-            elif len(self.barcodeResult) == 0 :
+                print ('BARCODE DATA: ', self.barcodeResult)  
+                if len(self.barcodeResult) >= 13 and self.ticket_in == True:
+                    self.barcodeResult = self.barcodeResult[:9]
+                    try:
+                        resp, cont, head = self.httpreq.sendticketexit(self.barcodeResult)
+                        c = json.loads(cont.decode('utf-8'))
+                        msg_screen = resp
+                        if msg_screen == 503:
+                            ex = str(c['exception'])
+                            print(ex)
+                            self.barcodeResult = ""
+                            self.ticketdispenser_.returnticketcmd()
+                            self.ticket_in = False
+                        if msg_screen == 503 and ex == "TicketNotPaidException":
+                            msg_screen = msg_screen + 1
+                            self.barcodeResult = ""
+                            self.ticketdispenser_.returnticketcmd()
+                            self.ticket_in = False
+                        elif msg_screen == 503 and ex != "TicketNotPaidException":
+                            msg_screen = msg_screen + 4
+                            self.barcodeResult = ""
+                            self.ticketdispenser_.returnticketcmd()
+                            self.ticket_in = False
+                        elif msg_screen == 200 or msg_screen == 201:
+                            self.ticketdispenser_.captureticketcmd()
+                            self.barcodeResult = ""
+                            self.ticket_in = True
+                        else:
+                            # self.barcodeResult = ""
+                            pass
+                        self.httpreq.receive_ticket_exit(resp)
+                        # time.sleep(0.5)
+                    except:
+                        print("BARCODE EXCEPTION")
+                elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
             try:
                 if self.msg != msg_screen:
@@ -870,38 +870,38 @@ class ThreadedClient:
                            key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                            # print (key_lookup)  # Print it all out!
                            self.qrcodeResult += key_lookup
-                print ('QRCODE DATA: ', self.qrcodeResult) 
-                if len(self.qrcodeResult) >= 13:
-                    self.qrcodeResult = self.qrcodeResult[:9]
-                    try:
-                        resp, cont, head = self.httpreq.sendticketexit(self.qrcodeResult)
-                        c = json.loads(cont.decode('utf-8'))
-                        msg_screen = resp
-                        if msg_screen == 503:
-                            ex = str(c['exception'])
-                            print(ex)
-                            self.qrcodeResult = ""
-                            # self.ticketdispenser_.returnticketcmd()
-                            # self.ticket_in = False
-                        if msg_screen == 503 and ex == "TicketNotPaidException":
-                            msg_screen = msg_screen + 1
-                            self.qrcodeResult = ""
-                            # self.ticketdispenser_.returnticketcmd()
-                            # self.ticket_in = False
-                        elif msg_screen == 503 and ex != "TicketNotPaidException":
-                            msg_screen = msg_screen + 4
-                            self.qrcodeResult = ""
-                            # self.ticketdispenser_.returnticketcmd()
-                            # self.ticket_in = False
-                        else:
-                            # self.barcodeResult = ""
-                            pass
-                        self.httpreq.receive_ticket_exit(resp)
-                        # time.sleep(0.5)
-                    except:
-                        print("QRCODE EXCEPTION")
-                elif len(self.qrcodeResult) == 0 :
-                    self.qrcodeResult = ""
+                    print ('QRCODE DATA: ', self.qrcodeResult) 
+                    if len(self.qrcodeResult) >= 13:
+                        self.qrcodeResult = self.qrcodeResult[:9]
+                        try:
+                            resp, cont, head = self.httpreq.sendticketexit(self.qrcodeResult)
+                            c = json.loads(cont.decode('utf-8'))
+                            msg_screen = resp
+                            if msg_screen == 503:
+                                ex = str(c['exception'])
+                                print(ex)
+                                self.qrcodeResult = ""
+                                # self.ticketdispenser_.returnticketcmd()
+                                # self.ticket_in = False
+                            if msg_screen == 503 and ex == "TicketNotPaidException":
+                                msg_screen = msg_screen + 1
+                                self.qrcodeResult = ""
+                                # self.ticketdispenser_.returnticketcmd()
+                                # self.ticket_in = False
+                            elif msg_screen == 503 and ex != "TicketNotPaidException":
+                                msg_screen = msg_screen + 4
+                                self.qrcodeResult = ""
+                                # self.ticketdispenser_.returnticketcmd()
+                                # self.ticket_in = False
+                            else:
+                                # self.barcodeResult = ""
+                                pass
+                            self.httpreq.receive_ticket_exit(resp)
+                            # time.sleep(0.5)
+                        except:
+                            print("QRCODE EXCEPTION")
+                    elif len(self.qrcodeResult) == 0 :
+                        self.qrcodeResult = ""
                 try:
                     if self.msg != msg_screen:
                         self.msg = msg_screen
