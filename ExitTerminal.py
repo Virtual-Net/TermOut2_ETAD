@@ -109,7 +109,7 @@ class GuiPart:
         while self.queue.qsize():
             try:
                 msg = self.queue.get(0)
-                print("incoming msg: {}".format(msg))
+                logger.info("incoming msg: {}".format(msg))
                 #msg = msgc
                 # Check contents of message and do whatever is needed. As a
                 # simple test, print it (in real life, you would
@@ -239,7 +239,7 @@ class GuiPart:
                 #print(self.queue)
             except:
                 # self.master2.after(200, ThreadedClient.periodicCall)
-                print('QUEUE IS EMPTY')
+                logger.info('QUEUE IS EMPTY')
                 pass
                 # just on general principles, although we don't
                 # expect this branch to be taken in this case
@@ -256,7 +256,7 @@ class SocketHandler:
         try:
             logger.info("Calling blocking conn.recv()")
             cmd = str(self.conn.recv(1024))
-            print(cmd)
+            logger.info(cmd)
         except:
             logger.info("exception in conn.recv()") 
             # happens when connection is reset from the peer
@@ -338,7 +338,7 @@ class ThreadedClient:
         if self.queuechk.qsize():
             #self.gui.proccessIncoming()
             msgc = self.queuechk.get(0)
-            print("incoming msg: {}".format(msgc))
+            logger.info("incoming msg: {}".format(msgc))
         #msgc = self.msg
             #time.sleep(0.1)
             if msgc == 1 or msgc == 506:
@@ -368,7 +368,7 @@ class ThreadedClient:
                 self.master.after(50, self.periodicCall)
                 pass
             if msgc == 201 or msgc == 200 or msgc == 505:
-                print("CHECK: {}".format(msgc))
+                logger.info("CHECK: {}".format(msgc))
                 #self.gui.processIncoming()
                 if not self.running:
                     # This is the brutal stop of the system. You may want to do
@@ -381,7 +381,7 @@ class ThreadedClient:
                 self.master.after(2000, self.periodicCall)
                 pass
             if msgc == 404 or msgc == 503 or msgc == 504 or msgc == 405 or msgc == 406 or msgc == 507:
-                print("CHECK: {}".format(msgc))
+                logger.info("CHECK: {}".format(msgc))
                 #self.gui.processIncoming()
                 if not self.running:
                     # This is the brutal stop of the system. You may want to do
@@ -397,7 +397,7 @@ class ThreadedClient:
         else:
             while self.running == 1:
                 if self.queuechk.qsize():
-                    print("passed")
+                    logger.info("passed")
                     self.master.after(10, self.periodicCall)
                     break
         #except:
@@ -512,8 +512,6 @@ class ThreadedClient:
                             # self.enabledispenser = False
                             # return
                             ex = str(c['exception'])
-                            
-                            print(ex)
                             logger.info(ex)
                         if msg_screen == 503 and ex == "TicketNotPaidException":
                             msg_screen = msg_screen + 1
@@ -574,7 +572,7 @@ class ThreadedClient:
                     #print(self.queue.get(0))
 					#print(msg_screen)
             except:
-                print('no msg on Adel Dispenser Thread')
+                logger.info('no msg on Adel Dispenser Thread')
            
 
     def workerThreadDispenserDDM(self):
@@ -591,9 +589,9 @@ class ThreadedClient:
             time.sleep(0.2)
             if loopstate == 1  or self.looptimer < self.looptimerset:
                 logger.info('loop was activated')
-                print(self.ticketdispenser_.ticketdispenserstatuscmd())
+                logger.info(self.ticketdispenser_.ticketdispenserstatuscmd())
                 ticketdispenserbarc, ticketdispenserrespcmd = self.ticketdispenser_.readticketdispenserresponse()
-                print(ticketdispenserrespcmd)
+                logger.info(ticketdispenserrespcmd)
                 if self.messageflag == False:
                     msg_screen = 1
                 # if ticketdispenserrespcmd[3] == 5: pass logger.info('no ticket @ front') if ticketdispenserrespcmd[
@@ -608,7 +606,7 @@ class ThreadedClient:
                             ticketdispenserrespcmd) > 10 and ticketdispenserrespcmd[13] == 3:
                         # ticketdispenserbarc, ticketdispenserrespcmd =
                         # self.ticketdispenser_.readticketdispenserresponse()
-                        print("Status: " + ticketdispenserbarc)
+                        logger.ingo("Status: " + ticketdispenserbarc)
                         # time.sleep(0)
                         logger.info('TICKET DETECTED')
                         self.ticketdispenser_.intaketochipcmd()
@@ -621,8 +619,8 @@ class ThreadedClient:
                     # self.queue.put(msg)
                 # time.sleep(0.5)
                 if 'b' not in ticketdispenserbarc:
-                    print("BARCODE = " + ticketdispenserbarc)
-                    print(type(ticketdispenserbarc))
+                    logger.info("BARCODE = " + ticketdispenserbarc)
+                    logger.info(type(ticketdispenserbarc))
                     # self.ticketdispenser_.getinput()
                     if '<' in ticketdispenserbarc:
                         msg_screen = 505
@@ -673,7 +671,7 @@ class ThreadedClient:
                     #print(self.queue.get(0))
                 #print(msg_screen)
             except:
-                print('no msg on DDM Thread')
+                logger.info('no msg on DDM Thread')
                 
     def workerThreadDispenserPico(self):
         """This is where we handle the asynchronous I/O. For example, it may be
@@ -691,9 +689,9 @@ class ThreadedClient:
                 logger.info('loop was activated')
                 self.ticketdispenser_.getTicketDispenserStatus()
                 ticketdispenserrespcmd = self.ticketdispenser_.readTicketDispenserResponse()
-                print(ticketdispenserrespcmd)
+                logger.info(ticketdispenserrespcmd)
                 if ticketdispenserrespcmd == b'\x00\x01':
-                    print('ticket @ front')
+                    logger.info('ticket @ front')
                     if self.ticket_at_front == False:
                         self.ticketdispenser_.intaketochipcmd()
                         self.ticket_at_front = True
@@ -702,7 +700,7 @@ class ThreadedClient:
                 elif ticketdispenserrespcmd == b'\x00\x00':
                     self.ticket_at_front = False
                     self.barcodeResult = ""
-                    print('no ticket present')
+                    logger.info('no ticket present')
                 elif ticketdispenserrespcmd == b'\x00\x06' and self.barcodeResult == "":
                     self.ticketdispenser_.readPosition3TicketDispenserCmd()
                 elif ticketdispenserrespcmd == b'\x00\x02' and self.barcodeResult == "":
@@ -733,7 +731,8 @@ class ThreadedClient:
                     #print(self.queue.get(0))
                 #print(msg_screen)
             except:
-                print('no msg on Pico Thread')
+                logger.info('no msg on Pico Thread')
+                
 
     def workerThreadUSBBarcode(self):
         '''DevicesList = open('/proc/bus/input/devices').readlines()
@@ -776,7 +775,7 @@ class ThreadedClient:
                        key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                        # print (key_lookup)  # Print it all out!
                        self.barcodeResult += key_lookup
-                print ('BARCODE DATA: ', self.barcodeResult)  
+                logger.info ('BARCODE DATA: ', self.barcodeResult)  
                 if len(self.barcodeResult) >= 13 and self.ticket_in == True:
                     self.barcodeResult = self.barcodeResult[:9]
                     try:
@@ -785,7 +784,7 @@ class ThreadedClient:
                         msg_screen = resp
                         if msg_screen == 503:
                             ex = str(c['exception'])
-                            print(ex)
+                            logger.info(ex)
                             self.barcodeResult = ""
                             self.ticketdispenser_.returnticketcmd()
                             self.ticket_in = False
@@ -809,7 +808,7 @@ class ThreadedClient:
                         self.httpreq.receive_ticket_exit(resp)
                         # time.sleep(0.5)
                     except:
-                        print("BARCODE EXCEPTION")
+                        logger.info("BARCODE EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
                 try:
@@ -818,7 +817,7 @@ class ThreadedClient:
                         self.queue.put(msg_screen)
                         self.queuechk.put(msg_screen)
                 except:
-                    print("no msg on USB Barcode Thread")
+                    logger.info("no msg on USB Barcode Thread")
                        
 
     def workerThreadRFID(self):
@@ -851,7 +850,7 @@ class ThreadedClient:
                             #print(self.queue.get(0))
                         #print(msg_screen)
                     except:
-                        print('no msg on RFID Thread')
+                        logger.info('no msg on RFID Thread')
                     # self.queue.put(msg)
                 # self.enabledispenser = False
             """elif loopstate == 0 and self.looptimer > self.looptimerset:
@@ -903,7 +902,7 @@ class ThreadedClient:
                            key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                            # print (key_lookup)  # Print it all out!
                            self.qrcodeResult += key_lookup
-                    print ('QRCODE DATA: ', self.qrcodeResult) 
+                    logger.info('QRCODE DATA: ', self.qrcodeResult) 
                     if len(self.qrcodeResult) >= 13:
                         self.qrcodeResult = self.qrcodeResult[:9]
                         try:
@@ -912,7 +911,7 @@ class ThreadedClient:
                             msg_screen = resp
                             if msg_screen == 503:
                                 ex = str(c['exception'])
-                                print(ex)
+                                logger.info(ex)
                                 self.qrcodeResult = ""
                                 # self.ticketdispenser_.returnticketcmd()
                                 # self.ticket_in = False
@@ -932,7 +931,7 @@ class ThreadedClient:
                             self.httpreq.receive_ticket_exit(resp)
                             # time.sleep(0.5)
                         except:
-                            print("QRCODE EXCEPTION")
+                            logger.info("QRCODE EXCEPTION")
                     elif len(self.qrcodeResult) == 0 :
                         self.qrcodeResult = ""
                     try:
@@ -941,7 +940,7 @@ class ThreadedClient:
                             self.queue.put(msg_screen)
                             self.queuechk.put(msg_screen)
                     except:
-                        print("no msg on QRCode Thread")
+                        logger.info("no msg on QRCode Thread")
                         
                     
     def workerThreadListener(self):
@@ -970,13 +969,13 @@ class ThreadedClient:
     
             conn, addr = serverSocket.accept()
             data = str(conn.recv(1024))
-            print("received message:" + data)
+            logger.info("received message:" + data)
             data = data.split("msg=",1)[1]
-            print(data)
+            logger.info(data)
             data = data.strip()
-            print(data)
+            logger.info(data)
             data = data.replace("@'","")
-            print(data)
+            logger.info(data)
             if(data == "0"):
                 relays.setbarrierpin()
                 relays.resetbarrierpin()
@@ -989,10 +988,10 @@ class ThreadedClient:
                         #print(self.queue.get(0))
                     #print(msg_screen)
                 except:
-                    print('no msg')
+                    logger.info('no msg')
                 #self.queue.put(msg)
             #graphics_test.update()
-            print("Connected with client at " + addr[0])
+            logger.info("Connected with client at " + addr[0])
             #socketHandler = SocketHandler(conn)
             # necessary to terminate it at program termination:
             #socketHandler.setDaemon(True)  
@@ -1002,14 +1001,14 @@ class ThreadedClient:
     def workerThreadReadCPUTemp(self):
         while self.running:
             coolingFans = GeneralOutput()
-            print('CPU temperature is', self.cpuTemp.temperature)
+            logger.info(self.cpuTemp.temperature)
             time.sleep(2)
             if self.cpuTemp.temperature > 50:
                 coolingFans.setFanspin()
-                print('Cooling fans started')
+                logger.info('Cooling fans started')
             elif self.cpuTemp.temperature < 50:
                 coolingFans.resetFanspin()
-                print('Cooling fans stopped')
+                logger.info('Cooling fans stopped')
     
 
     def endApplication(self):
