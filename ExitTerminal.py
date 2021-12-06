@@ -782,7 +782,7 @@ class ThreadedClient:
                        key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                        # print (key_lookup)  # Print it all out!
                        self.barcodeResult += key_lookup
-                print('BARCODE DATA: '+ str(self.barcodeResult))
+                logger.info('BARCODE DATA: '+ str(self.barcodeResult))
                 if len(self.barcodeResult) >= 13 and self.ticket_in == True:
                     self.barcodeResult = self.barcodeResult[:9]
                     try:
@@ -815,7 +815,7 @@ class ThreadedClient:
                         self.httpreq.receive_ticket_exit(resp)
                         # time.sleep(0.5)
                     except:
-                        logger.info("BARCODE EXCEPTION")
+                        logger.info("BARCODE HTTP EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
                     self.barcodeResult = ""
                 try:
@@ -909,7 +909,7 @@ class ThreadedClient:
                            key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                            # print (key_lookup)  # Print it all out!
                            self.qrcodeResult += key_lookup
-                    print('QRCODE DATA: '+ str(self.qrcodeResult))
+                    logger.info('QRCODE DATA: '+ str(self.qrcodeResult))
                     if len(self.qrcodeResult) >= 13:
                         self.qrcodeResult = self.qrcodeResult[:9]
                         try:
@@ -940,7 +940,7 @@ class ThreadedClient:
                             self.httpreq.receive_ticket_exit(resp)
                             # time.sleep(0.5)
                         except:
-                            logger.info("QRCODE EXCEPTION")
+                            logger.info("QRCODE HTTP EXCEPTION")
                     elif len(self.qrcodeResult) == 0 :
                         self.qrcodeResult = ""
             elif loopstate == 0:
