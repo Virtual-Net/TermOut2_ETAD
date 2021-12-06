@@ -951,9 +951,9 @@ class ThreadedClient:
                 self.timer = time.time()
             try:
                 if self.msg != msg_screen:
-                self.msg = msg_screen
-                self.queue.put(msg_screen)
-                self.queuechk.put(msg_screen)
+                    self.msg = msg_screen
+                    self.queue.put(msg_screen)
+                    self.queuechk.put(msg_screen)
             except:
                 logger.info("no msg on QRCode Thread")
                         
