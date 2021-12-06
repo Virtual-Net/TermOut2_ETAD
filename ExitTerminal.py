@@ -283,6 +283,7 @@ class ThreadedClient:
     timer = time.time()
     cpuTemp = CPUTemperature()
     looptimer = 0
+    dispensertimer = 0
     barcodeResult = ""
     qrcodeResult = ""
     with open('/home/pi/AutoPark2020_Exit/TerminalSettings.json') as json_file:
@@ -291,6 +292,7 @@ class ThreadedClient:
     looptimerset = data["loop-time"]
     looptimerset = int(looptimerset)
     ticketdispenser_ = globals()['TicketDispenser' + dispensername]()
+    dispensertimerset = 8
     periodicflag = False
     msg = 1
 
@@ -416,6 +418,9 @@ class ThreadedClient:
         # self.gui.processIncoming()"""
 
     def looptimer_tick(self):
+        self.machinestate = 0
+        
+    def dispensertimer_tick(self):
         self.machinestate = 0
         
     def MSGTimer(self, msgtimeset):
@@ -703,16 +708,18 @@ class ThreadedClient:
                     logger.info('no ticket present')
                 elif ticketdispenserrespcmd == b'\x00\x06' and self.barcodeResult == "":
                     self.ticketdispenser_.readPosition3TicketDispenserCmd()
+                    # self.dispensertimer = float(time.time() - self.timer)
                 elif ticketdispenserrespcmd == b'\x00\x02' and self.barcodeResult == "":
                     for it in range(9):
                         self.ticketdispenser_.stepInTicketDispenserCmd()
                 elif ticketdispenserrespcmd == b'\x00\x04' and self.barcodeResult == "":
                     self.ticketdispenser_.readPosition1TicketDispenserCmd()
-                elif ticketdispenserrespcmd == b'\x00\x03' and self.barcodeResult == "":
+                elif ticketdispenserrespcmd == b'\x00\x03' and self.barcodeResult == "": # or self.dispensertimer > self.dispensertimerset:
                     self.ticketdispenser_.returnticketcmd()
+                    # self.timer = time.time()
                 if self.messageflag == False:
                     msg_screen = 1
-                self.looptimer =float(time.time() - self.timer)
+                self.looptimer = float(time.time() - self.timer)
             elif loopstate == 0:
                 if self.enabledispenser == False:
                     self.enabledispenser = True
@@ -803,8 +810,8 @@ class ThreadedClient:
                             self.barcodeResult = ""
                             self.ticket_in = False
                         else:
-                            # self.barcodeResult = ""
-                            pass
+                            self.ticketdispenser_.returnticketcmd()
+                            # pass
                         self.httpreq.receive_ticket_exit(resp)
                         # time.sleep(0.5)
                     except:
