@@ -775,7 +775,7 @@ class ThreadedClient:
                        key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                        # print (key_lookup)  # Print it all out!
                        self.barcodeResult += key_lookup
-                logger.info ('BARCODE DATA: ', self.barcodeResult)  
+                print('BARCODE DATA: '+ str(self.barcodeResult))
                 if len(self.barcodeResult) >= 13 and self.ticket_in == True:
                     self.barcodeResult = self.barcodeResult[:9]
                     try:
@@ -801,7 +801,7 @@ class ThreadedClient:
                         elif msg_screen == 200 or msg_screen == 201:
                             self.ticketdispenser_.captureticketcmd()
                             self.barcodeResult = ""
-                            self.ticket_in = True
+                            self.ticket_in = False
                         else:
                             # self.barcodeResult = ""
                             pass
@@ -902,7 +902,7 @@ class ThreadedClient:
                            key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                            # print (key_lookup)  # Print it all out!
                            self.qrcodeResult += key_lookup
-                    logger.info('QRCODE DATA: ', self.qrcodeResult) 
+                    print('QRCODE DATA: '+ str(self.qrcodeResult))
                     if len(self.qrcodeResult) >= 13:
                         self.qrcodeResult = self.qrcodeResult[:9]
                         try:
@@ -925,6 +925,8 @@ class ThreadedClient:
                                 self.qrcodeResult = ""
                                 # self.ticketdispenser_.returnticketcmd()
                                 # self.ticket_in = False
+                            elif msg_screen == 201 or msg_screen == 200:
+                                self.qrcodeResult = ""
                             else:
                                 # self.barcodeResult = ""
                                 pass
