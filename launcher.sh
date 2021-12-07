@@ -5,7 +5,7 @@ log="/home/pi/Autopark2020_Exit/logs/$(date +%Y-%m-%d)_launch.log"
 echo $(date): Starting launcher.sh | tee -a "$log"
 
 cd /
-cd home/pi/Autopark2020_Exit
+cd home/pi/AutoPark2020_Exit
 sudo python3 ExitTerminal.py
 cd /
 
