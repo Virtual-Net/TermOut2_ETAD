@@ -693,6 +693,7 @@ class ThreadedClient:
             if loopstate == 1  or self.looptimer < self.looptimerset:
                 logger.info('loop was activated')
                 self.ticketdispenser_.getTicketDispenserStatus()
+                time.sleep(0.3)
                 ticketdispenserrespcmd = self.ticketdispenser_.readTicketDispenserResponse()
                 logger.info(ticketdispenserrespcmd)
                 if ticketdispenserrespcmd == b'\x00\x01':
@@ -708,15 +709,13 @@ class ThreadedClient:
                     logger.info('no ticket present')
                 elif ticketdispenserrespcmd == b'\x00\x06' and self.barcodeResult == "":
                     self.ticketdispenser_.readPosition3TicketDispenserCmd()
-                    # self.dispensertimer = float(time.time() - self.timer)
                 elif ticketdispenserrespcmd == b'\x00\x02' and self.barcodeResult == "":
                     for it in range(9):
                         self.ticketdispenser_.stepInTicketDispenserCmd()
                 elif ticketdispenserrespcmd == b'\x00\x04' and self.barcodeResult == "":
                     self.ticketdispenser_.readPosition1TicketDispenserCmd()
-                elif ticketdispenserrespcmd == b'\x00\x03' and self.barcodeResult == "": # or self.dispensertimer > self.dispensertimerset:
+                elif ticketdispenserrespcmd == b'\x00\x03' and self.barcodeResult == "" or ticketdispenserrespcmd == b'\x00\x03' and  not self.ticket_in:
                     self.ticketdispenser_.returnticketcmd()
-                    # self.timer = time.time()
                 if self.messageflag == False:
                     msg_screen = 1
                 self.looptimer = float(time.time() - self.timer)
@@ -749,6 +748,8 @@ class ThreadedClient:
         elif 'GD32icroelectronics GD32 Custm HID' in DevicesList[13]:
             device_event_number = DevicesList[17].split('event',1)[1]
             dev = '/dev/input/event' + device_event_number'''
+        self.queue.put(1)
+        self.queuechk.put(1)
         while self.running:
             DevicesList = open('/proc/bus/input/devices').readlines()
             if 'GD32icroelectronics GD32 Custm HID' in DevicesList[1]:
@@ -793,31 +794,31 @@ class ThreadedClient:
                         if msg_screen == 503:
                             ex = str(c['exception'])
                             logger.info(ex)
-                            self.barcodeResult = ""
+                            # self.barcodeResult = ""
                             self.ticketdispenser_.returnticketcmd()
                             self.ticket_in = False
                         if msg_screen == 503 and ex == "TicketNotPaidException":
                             msg_screen = msg_screen + 1
-                            self.barcodeResult = ""
+                            # self.barcodeResult = ""
                             self.ticketdispenser_.returnticketcmd()
                             self.ticket_in = False
                         elif msg_screen == 503 and ex != "TicketNotPaidException":
                             msg_screen = msg_screen + 4
-                            self.barcodeResult = ""
+                            # self.barcodeResult = ""
                             self.ticketdispenser_.returnticketcmd()
                             self.ticket_in = False
                         elif msg_screen == 200 or msg_screen == 201:
                             self.ticketdispenser_.captureticketcmd()
-                            self.barcodeResult = ""
+                            # self.barcodeResult = ""
                             self.ticket_in = False
                         else:
                             self.ticketdispenser_.returnticketcmd()
-                            # pass
                         self.httpreq.receive_ticket_exit(resp)
-                        # time.sleep(0.5)
+                        self.barcodeResult = ""
                     except:
                         logger.info("BARCODE HTTP EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
+                    # self.ticket_in = False
                     self.barcodeResult = ""
                 try:
                     if self.msg != msg_screen:
@@ -829,6 +830,8 @@ class ThreadedClient:
                        
 
     def workerThreadRFID(self):
+        self.queue.put(1)
+        self.queuechk.put(1)
         while self.running:
             # To simulate asynchronous I/O, we create a random number at random intervals.
             # Replace the following two lines with the real thing.
@@ -868,8 +871,11 @@ class ThreadedClient:
                 if self.messageflag == True:
                     msg_screen = 2"""
                 #self.msg = msg_screen
+                
 
     def workerThreadQrCode(self):
+        self.queue.put(1)
+        self.queuechk.put(1)
         while self.running:
             DevicesList = open('/proc/bus/input/devices').readlines()
             if 'USBKey Chip USBKey Module' in DevicesList[1]:
