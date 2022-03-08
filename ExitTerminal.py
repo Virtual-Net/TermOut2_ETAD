@@ -322,8 +322,8 @@ class ThreadedClient:
         self.thread3.start()
         self.thread4 = threading.Thread(target=self.workerThreadListener)
         self.thread4.start()
-        # self.thread5 = threading.Thread(target=self.workerThreadUSBBarcode)
-        # self.thread5.start()
+        self.thread5 = threading.Thread(target=self.workerThreadUSBBarcode)
+        self.thread5.start()
         self.thread6 = threading.Thread(target=self.workerThreadReadCPUTemp)
         self.thread6.start()
 
@@ -783,9 +783,9 @@ class ThreadedClient:
                        key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(data.scancode)  # Lookup or return UNKNOWN:XX
                        # print (key_lookup)  # Print it all out!
                        self.barcodeResult += key_lookup
-                logger.info('BARCODE DATA: ') # + str(self.barcodeResult))
-                logger.info(self.barcodeResult)
-                if len(self.barcodeResult) >= 13 and self.ticket_in == True:
+                print('BARCODE DATA: ') # + str(self.barcodeResult))
+                print(self.barcodeResult)
+                if len(self.barcodeResult) >= 9:
                     self.barcodeResult = self.barcodeResult[:9]
                     try:
                         resp, cont, head = self.httpreq.sendticketexit(self.barcodeResult)
@@ -815,6 +815,15 @@ class ThreadedClient:
                             self.ticketdispenser_.returnticketcmd()
                         self.httpreq.receive_ticket_exit(resp)
                         self.barcodeResult = ""
+                        try:
+                            if self.msg != msg_screen:
+                                self.msg = msg_screen
+                                self.queue.put(msg_screen)
+                                self.queuechk.put(msg_screen)
+                                #print(self.queue.get(0))
+                                #print(msg_screen)
+                        except:
+                            logger.info('no msg on RFID Thread')
                     except:
                         logger.info("BARCODE HTTP EXCEPTION")
                 elif len(self.barcodeResult) == 0 :
